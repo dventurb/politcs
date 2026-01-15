@@ -12,7 +12,7 @@ class Game:
         self.characters = init_characters()
         self.character = None
 
-def init_game(box):
+def init_menu(stack):
     game = Game()
     game.character = game.characters[0]
 
@@ -20,8 +20,8 @@ def init_game(box):
     mix.Mix_OpenAudio(44100, mix.MIX_DEFAULT_FORMAT, 2, 2048)
 
     character_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-    box.append(character_box)
-    
+    stack.add_named(character_box, "menu")
+
     left_arrow = Gtk.Picture()
     left_arrow.set_filename("assets/left_arrow.png")
     gesture_left = Gtk.GestureClick()
@@ -57,8 +57,16 @@ def init_game(box):
 
     button = Gtk.Button(label="PLAY")
     button.get_style_context().add_class("btn-play")
+    button.connect("clicked", clicked_play, game)
+    button.stack = stack
     vt_box.append(button)
 
+def init_game(stack, game):
+    box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+    stack.add_named(box, "game")
+
+    label = Gtk.Label(label="ROUND")
+    box.append(label)
 
 def init_characters():
     return [
@@ -129,3 +137,6 @@ def clicked_rigth_arrow(gesture, n_press, x, y, game):
     gesture.image.set_filename(game.character.cartoon)
     update_display_stats(game, gesture.stats) 
 
+def clicked_play(button, data):
+    init_game(button.stack, data)
+    button.stack.set_visible_child_name("game")
