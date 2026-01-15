@@ -19,7 +19,7 @@ class Game:
                 Option("scissor", "assets/scissor.png"),
                 Option("paper", "assets/paper.png")
                 ]
-        self.round = 1
+        self.rounds = 1
         self.wins = 0 
         self.loses = 0 
 
@@ -86,10 +86,10 @@ def init_game(stack, game):
     box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
     stack.add_named(box, "game")
 
-    label = Gtk.Label(label="ROUND")
-    label.get_style_context().add_class("label-round")
-    label.set_halign(Gtk.Align.CENTER)
-    box.append(label)
+    label_round = Gtk.Label(label="ROUND 1")
+    label_round.get_style_context().add_class("label-round")
+    label_round.set_halign(Gtk.Align.CENTER)
+    box.append(label_round)
     
     ht_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=100)
     ht_box.set_margin_start(50)
@@ -105,7 +105,7 @@ def init_game(stack, game):
     vt_box.append(label)
 
     image_1 = Gtk.Picture()
-    image_1.set_filename("assets/stars_0.png")    
+    update_stars(game.wins, image_1)
     image_1.set_size_request(width=120, height=40)
     image_1.set_halign(Gtk.Align.CENTER)
     vt_box.append(image_1)
@@ -122,8 +122,8 @@ def init_game(stack, game):
     label.set_halign(Gtk.Align.CENTER)
     vt_box.append(label)
 
-    image_2 = Gtk.Picture()
-    image_2.set_filename("assets/stars_0.png")
+    image_2 = Gtk.Picture()        
+    update_stars(game.loses, image_2)
     image_2.set_size_request(width=120, height=40)
     image_2.set_margin_start(30)
     image_2.set_margin_end(30)
@@ -147,6 +147,7 @@ def init_game(stack, game):
     gesture = Gtk.GestureClick()
     gesture.player = image_1
     gesture.enime = image_2
+    gesture.rounds = label_round
     gesture.box = game_box
     rock.add_controller(gesture)
     gesture.connect("pressed", clicked_rock, game)
@@ -159,6 +160,7 @@ def init_game(stack, game):
     gesture = Gtk.GestureClick()  
     gesture.player = image_1
     gesture.enime = image_2
+    gesture.rounds = label_round
     gesture.box = game_box
     paper.add_controller(gesture)
     gesture.connect("pressed", clicked_paper, game)
@@ -171,6 +173,7 @@ def init_game(stack, game):
     gesture = Gtk.GestureClick()
     gesture.player = image_1
     gesture.enime = image_2
+    gesture.rounds = label_round
     gesture.box = game_box
     scissor.add_controller(gesture)
     gesture.connect("pressed", clicked_scissor, game)
@@ -300,10 +303,17 @@ def clicked_rock(gesture, n_press, x, y, game):
 
     if option.option == "scissor":
         game.wins += 1    
-        gesture.player.set_filename("assets/stars_1.png")
+        game.rounds += 1
+        update_stars(game.wins, gesture.player)
+        update_round(game.rounds, gesture.rounds)
     elif option.option == "paper":
         game.loses += 1 
-        gesture.enime.set_filename("assets/stars_1.png")
+        game.rounds += 1
+        update_stars(game.loses, gesture.enime)
+        update_round(game.rounds, gesture.rounds)
+    else:
+        game.rounds += 1 
+        update_round(game.rounds, gesture.rounds)
 
 
 
@@ -326,10 +336,17 @@ def clicked_scissor(gesture, n_press, x, y, game):
 
     if option.option == "paper":
         game.wins += 1    
-        gesture.player.set_filename("assets/stars_1.png")
+        game.rounds += 1
+        update_stars(game.wins, gesture.player)
+        update_round(game.rounds, gesture.rounds)
     elif option.option == "rock":
         game.loses += 1 
-        gesture.enime.set_filename("assets/stars_1.png")
+        game.rounds += 1
+        update_stars(game.loses, gesture.enime)
+        update_round(game.rounds, gesture.rounds)
+    else:
+        game.rounds += 1 
+        update_round(game.rounds, gesture.rounds)
 
 
 def clicked_paper(gesture, n_press, x, y, game):
@@ -350,8 +367,33 @@ def clicked_paper(gesture, n_press, x, y, game):
     gesture.box.append(image)
 
     if option.option == "rock":
-        game.wins += 1    
-        gesture.player.set_filename("assets/stars_1.png")
+        game.wins += 1 
+        game.rounds += 1
+        update_stars(game.wins, gesture.player)
+        update_round(game.rounds, gesture.rounds)
     elif option.option == "scissor":
-        game.loses += 1 
-        gesture.enime.set_filename("assets/stars_1.png")
+        game.loses += 1
+        game.rounds += 1
+        update_stars(game.loses, gesture.enime)   
+        update_round(game.rounds, gesture.rounds)
+    else:
+        game.rounds += 1 
+        update_round(game.rounds, gesture.rounds)
+
+
+def update_stars(score, image):
+
+    if score == 0:
+        image.set_filename("assets/stars_0.png")
+    elif score == 1:
+        image.set_filename("assets/stars_1.png")
+    elif score == 2:
+        image.set_filename("assets/stars_2.png")
+    elif score == 3:
+        image.set_filename("assets/stars_3.png")
+
+
+def update_round(rounds, label):
+    text = f"ROUND {rounds}"
+    label.set_text(text)
+
