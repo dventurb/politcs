@@ -118,8 +118,7 @@ def update_display_stats(game, box):
         bar.get_style_context().add_class("progressbar")
         box.append(bar)
 
-    sound = mix.Mix_LoadWAV(bytes(game.character.sound, "utf-8"))
-    mix.Mix_PlayChannel(-1, sound, 0)
+
 
 def clicked_left_arrow(gesture, n_press, x, y, game):
     index = (game.character.index - 1) % len(game.characters)
@@ -139,4 +138,8 @@ def clicked_rigth_arrow(gesture, n_press, x, y, game):
 
 def clicked_play(button, data):
     init_game(button.stack, data)
+
+    sound = mix.Mix_LoadWAV(bytes(data.character.sound, "utf-8"))
+    mix.Mix_PlayChannel(-1, sound, 0)
+    
     button.stack.set_visible_child_name("game")
