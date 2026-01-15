@@ -1,6 +1,6 @@
 import gi 
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 import sdl2
 import sdl2.sdlmixer as mix
@@ -149,6 +149,7 @@ def init_game(stack, game):
     gesture.enime = image_2
     gesture.rounds = label_round
     gesture.box = game_box
+    gesture.stack = stack
     rock.add_controller(gesture)
     gesture.connect("pressed", clicked_rock, game)
     rock.set_size_request(width=50, height=50)
@@ -162,6 +163,7 @@ def init_game(stack, game):
     gesture.enime = image_2
     gesture.rounds = label_round
     gesture.box = game_box
+    gesture.stack = stack
     paper.add_controller(gesture)
     gesture.connect("pressed", clicked_paper, game)
     paper.set_size_request(width=50, height=50)
@@ -175,6 +177,7 @@ def init_game(stack, game):
     gesture.enime = image_2
     gesture.rounds = label_round
     gesture.box = game_box
+    gesture.stack = stack
     scissor.add_controller(gesture)
     gesture.connect("pressed", clicked_scissor, game)
     scissor.set_size_request(width=50, height=50)
@@ -315,6 +318,16 @@ def clicked_rock(gesture, n_press, x, y, game):
         game.rounds += 1 
         update_round(game.rounds, gesture.rounds)
 
+    if game.wins == 3 or game.loses == 3:
+        GLib.timeout_add(3000, delay)
+        
+        game.wins = 0 
+        game.loses = 0 
+        game.rounds = 1
+
+        gesture.stack.set_visible_child_name("menu")
+        GLib.timeout_add(1000, delay)
+        gesture.stack.remove(gesture.stack.get_child_by_name("game"))
 
 
 def clicked_scissor(gesture, n_press, x, y, game):
@@ -347,6 +360,17 @@ def clicked_scissor(gesture, n_press, x, y, game):
     else:
         game.rounds += 1 
         update_round(game.rounds, gesture.rounds)
+    
+    if game.wins == 3 or game.loses == 3:
+        GLib.timeout_add(3000, delay)
+        
+        game.wins = 0 
+        game.loses = 0 
+        game.rounds = 1
+
+        gesture.stack.set_visible_child_name("menu")       
+        GLib.timeout_add(1000, delay)
+        gesture.stack.remove(gesture.stack.get_child_by_name("game"))
 
 
 def clicked_paper(gesture, n_press, x, y, game):
@@ -380,6 +404,17 @@ def clicked_paper(gesture, n_press, x, y, game):
         game.rounds += 1 
         update_round(game.rounds, gesture.rounds)
 
+    if game.wins == 3 or game.loses == 3:
+        GLib.timeout_add(3000, delay)
+
+        game.wins = 0 
+        game.loses = 0 
+        game.rounds = 1 
+
+        gesture.stack.set_visible_child_name("menu")
+        GLib.timeout_add(1000, delay)
+        gesture.stack.remove(gesture.stack.get_child_by_name("game"))
+
 
 def update_stars(score, image):
 
@@ -390,10 +425,12 @@ def update_stars(score, image):
     elif score == 2:
         image.set_filename("assets/stars_2.png")
     elif score == 3:
-        image.set_filename("assets/stars_3.png")
-
-
+        image.set_filename("assets/stars_3.png")    
+        
+        
 def update_round(rounds, label):
     text = f"ROUND {rounds}"
     label.set_text(text)
 
+def delay():
+    return False
