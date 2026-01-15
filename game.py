@@ -137,6 +137,7 @@ def init_game(stack, game):
     box.append(game_box)
     
     plays_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    plays_box.set_halign(Gtk.Align.CENTER)
     plays_box.set_margin_start(50)
     plays_box.set_margin_end(50)
     box.append(plays_box)

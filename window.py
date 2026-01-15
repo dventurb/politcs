@@ -9,6 +9,7 @@ WINDOW_HEIGHT = 600
 
 def create_window(app):
     window = Gtk.ApplicationWindow(application=app, title="Politcs")
+    window.set_resizable(False)
     window.set_default_size(WINDOW_WIDTH, WINDOW_HEIGHT)
     
     box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
