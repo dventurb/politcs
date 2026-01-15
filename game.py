@@ -5,12 +5,23 @@ from gi.repository import Gtk
 import sdl2
 import sdl2.sdlmixer as mix
 
+import random
+
 from character import Character
+from options import Option
 
 class Game:
     def __init__(self):
         self.characters = init_characters()
         self.character = None
+        self.options = [
+                Option("rock", "assets/rock.png"), 
+                Option("scissor", "assets/scissor.png"),
+                Option("paper", "assets/paper.png")
+                ]
+        self.round = 1
+        self.wins = 0 
+        self.loses = 0 
 
 def init_menu(stack):
     game = Game()
@@ -24,11 +35,15 @@ def init_menu(stack):
 
     left_arrow = Gtk.Picture()
     left_arrow.set_filename("assets/left_arrow.png")
+    left_arrow.get_style_context().add_class("arrow")
     gesture_left = Gtk.GestureClick()
     left_arrow.add_controller(gesture_left)
     gesture_left.connect("pressed", clicked_left_arrow, game)
-    left_arrow.set_margin_top(60)
-    left_arrow.set_margin_bottom(60)
+    left_arrow.set_size_request(width=50, height=50)
+    left_arrow.set_margin_top(200)
+    left_arrow.set_margin_end(30)
+    left_arrow.set_margin_start(30)
+    left_arrow.set_margin_bottom(200)
     character_box.append(left_arrow)
 
     image = Gtk.Picture()
@@ -36,18 +51,24 @@ def init_menu(stack):
     character_box.append(image)
     
     rigth_arrow = Gtk.Picture()
-    rigth_arrow.set_filename("assets/rigth_arrow.png")
+    rigth_arrow.set_filename("assets/rigth_arrow.png")    
+    rigth_arrow.get_style_context().add_class("arrow")
     gesture_rigth = Gtk.GestureClick()
     rigth_arrow.add_controller(gesture_rigth)
     gesture_rigth.connect("pressed", clicked_rigth_arrow, game)
-    rigth_arrow.set_margin_top(60)
-    rigth_arrow.set_margin_bottom(60)
+    rigth_arrow.set_size_request(width=50, height=50)
+    rigth_arrow.set_margin_top(200)
+    rigth_arrow.set_margin_end(30)
+    rigth_arrow.set_margin_start(30)
+    rigth_arrow.set_margin_bottom(200)
     character_box.append(rigth_arrow)
-
-    vt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+    
+    vt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=50)
+    vt_box.set_valign(Gtk.Align.CENTER)
     character_box.append(vt_box)
-
+    
     stats_box = create_display_stats(game)
+    stats_box.set_valign(Gtk.Align.CENTER)
     vt_box.append(stats_box)
 
     gesture_left.image = image
@@ -62,11 +83,101 @@ def init_menu(stack):
     vt_box.append(button)
 
 def init_game(stack, game):
-    box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
     stack.add_named(box, "game")
 
     label = Gtk.Label(label="ROUND")
+    label.get_style_context().add_class("label-round")
+    label.set_halign(Gtk.Align.CENTER)
     box.append(label)
+    
+    ht_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=100)
+    ht_box.set_margin_start(50)
+    ht_box.set_margin_end(50)
+    box.append(ht_box)
+
+    vt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    ht_box.append(vt_box)
+    
+    label = Gtk.Label(label="Your Score")
+    label.get_style_context().add_class("label-score")
+    label.set_halign(Gtk.Align.CENTER)
+    vt_box.append(label)
+
+    image_1 = Gtk.Picture()
+    image_1.set_filename("assets/stars_0.png")    
+    image_1.set_size_request(width=120, height=40)
+    image_1.set_halign(Gtk.Align.CENTER)
+    vt_box.append(image_1)
+    
+    spacer = Gtk.Box()
+    spacer.set_hexpand(True)
+    ht_box.append(spacer)
+
+    vt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    ht_box.append(vt_box)
+    
+    label = Gtk.Label(label=game.character.name)
+    label.get_style_context().add_class("label-score")
+    label.set_halign(Gtk.Align.CENTER)
+    vt_box.append(label)
+
+    image_2 = Gtk.Picture()
+    image_2.set_filename("assets/stars_0.png")
+    image_2.set_size_request(width=120, height=40)
+    image_2.set_margin_start(30)
+    image_2.set_margin_end(30)
+    image_2.set_halign(Gtk.Align.CENTER)
+    vt_box.append(image_2)
+
+    game_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=150)
+    game_box.set_size_request(width=-1, height=300)
+    game_box.set_margin_start(50)
+    game_box.set_margin_end(50)
+    box.append(game_box)
+    
+    plays_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+    plays_box.set_margin_start(50)
+    plays_box.set_margin_end(50)
+    box.append(plays_box)
+
+    rock = Gtk.Picture()
+    rock.set_filename("assets/rock.png")
+    rock.get_style_context().add_class("rock")
+    gesture = Gtk.GestureClick()
+    gesture.player = image_1
+    gesture.enime = image_2
+    gesture.box = game_box
+    rock.add_controller(gesture)
+    gesture.connect("pressed", clicked_rock, game)
+    rock.set_size_request(width=50, height=50)
+    plays_box.append(rock)
+
+    paper = Gtk.Picture()
+    paper.set_filename("assets/paper.png")
+    paper.get_style_context().add_class("paper")
+    gesture = Gtk.GestureClick()  
+    gesture.player = image_1
+    gesture.enime = image_2
+    gesture.box = game_box
+    paper.add_controller(gesture)
+    gesture.connect("pressed", clicked_paper, game)
+    paper.set_size_request(width=50, height=50)
+    plays_box.append(paper)    
+
+    scissor = Gtk.Picture()
+    scissor.set_filename("assets/scissor.png")
+    scissor.get_style_context().add_class("scissor")
+    gesture = Gtk.GestureClick()
+    gesture.player = image_1
+    gesture.enime = image_2
+    gesture.box = game_box
+    scissor.add_controller(gesture)
+    gesture.connect("pressed", clicked_scissor, game)
+    scissor.set_size_request(width=50, height=50)
+    plays_box.append(scissor)
+
+
 
 def init_characters():
     return [
@@ -77,47 +188,72 @@ def init_characters():
 
 
 def create_display_stats(game):
-    stats_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+    
+    main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    
+    grid = Gtk.Grid()
+    grid.set_row_spacing(10)
+    main_box.append(grid)
+    
+    label_box = Gtk.Box()
+    grid.attach(label_box, 0, 0, 2, 1)
 
     label = Gtk.Label(label=game.character.name)
     label.get_style_context().add_class("title")
-    stats_box.append(label)
+    label_box.append(label)
+
+    
+    stats_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+    grid.attach(stats_box, 0, 1, 1, 1)
 
     stats = game.character.get_stats()   
 
     for i in stats:
         label = Gtk.Label(label=i)
         label.get_style_context().add_class("stats-label")
+        label.set_hexpand(False)
         stats_box.append(label)
 
         bar = Gtk.ProgressBar()
         bar.set_fraction(stats[i])
         bar.get_style_context().add_class("progressbar")
+        bar.set_hexpand(False)
         stats_box.append(bar)
 
-    return stats_box
+    return main_box
 
 def update_display_stats(game, box):
 
     while child := box.get_first_child():
         box.remove(child)
+    
+    grid = Gtk.Grid()
+    grid.set_row_spacing(10)
+    box.append(grid)
+    
+    label_box = Gtk.Box()
+    grid.attach(label_box, 0, 0, 2, 1)
 
-    label = Gtk.Label(label=game.character.name)    
+    label = Gtk.Label(label=game.character.name)
     label.get_style_context().add_class("title")
-    box.append(label)
-
+    label_box.append(label)
+    
+    stats_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+    grid.attach(stats_box, 0, 1, 1, 1)
+    
     stats = game.character.get_stats()   
 
     for i in stats:
         label = Gtk.Label(label=i)       
         label.get_style_context().add_class("stats-label")
-        box.append(label)
-
+        label.set_hexpand(False)
+        stats_box.append(label)
+        
         bar = Gtk.ProgressBar()
         bar.set_fraction(stats[i])
         bar.get_style_context().add_class("progressbar")
-        box.append(bar)
-
+        bar.set_hexpand(False)
+        stats_box.append(bar)
 
 
 def clicked_left_arrow(gesture, n_press, x, y, game):
@@ -143,3 +279,79 @@ def clicked_play(button, data):
     mix.Mix_PlayChannel(-1, sound, 0)
     
     button.stack.set_visible_child_name("game")
+
+
+def clicked_rock(gesture, n_press, x, y, game):
+
+    while child := gesture.box.get_first_child():
+        gesture.box.remove(child)
+    
+    image = Gtk.Picture()
+    image.set_filename("assets/rock.png")
+    image.set_size_request(width=50, height=50)
+    gesture.box.append(image)
+
+    option = random.choice(game.options)
+    
+    image = Gtk.Picture()
+    image.set_filename(option.image)
+    image.set_size_request(width=50, height=50)
+    gesture.box.append(image)
+
+    if option.option == "scissor":
+        game.wins += 1    
+        gesture.player.set_filename("assets/stars_1.png")
+    elif option.option == "paper":
+        game.loses += 1 
+        gesture.enime.set_filename("assets/stars_1.png")
+
+
+
+def clicked_scissor(gesture, n_press, x, y, game):
+    
+    while child := gesture.box.get_first_child():
+        gesture.box.remove(child)
+    
+    image = Gtk.Picture()
+    image.set_filename("assets/scissor.png")
+    image.set_size_request(width=50, height=50)
+    gesture.box.append(image)
+
+    option = random.choice(game.options)
+    
+    image = Gtk.Picture()
+    image.set_filename(option.image)
+    image.set_size_request(width=50, height=50)
+    gesture.box.append(image)
+
+    if option.option == "paper":
+        game.wins += 1    
+        gesture.player.set_filename("assets/stars_1.png")
+    elif option.option == "rock":
+        game.loses += 1 
+        gesture.enime.set_filename("assets/stars_1.png")
+
+
+def clicked_paper(gesture, n_press, x, y, game):
+    
+    while child := gesture.box.get_first_child():
+        gesture.box.remove(child)
+    
+    image = Gtk.Picture()
+    image.set_filename("assets/paper.png")
+    image.set_size_request(width=50, height=50)
+    gesture.box.append(image)
+
+    option = random.choice(game.options)
+    
+    image = Gtk.Picture()
+    image.set_filename(option.image)
+    image.set_size_request(width=50, height=50)
+    gesture.box.append(image)
+
+    if option.option == "rock":
+        game.wins += 1    
+        gesture.player.set_filename("assets/stars_1.png")
+    elif option.option == "scissor":
+        game.loses += 1 
+        gesture.enime.set_filename("assets/stars_1.png")
