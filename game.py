@@ -6,7 +6,6 @@ import sdl2
 import sdl2.sdlmixer as mix
 
 from character import Character
-from widgets import create_button_with_image
 
 class Game:
     def __init__(self):
@@ -57,6 +56,7 @@ def init_game(box):
     gesture_rigth.stats = stats_box
 
     button = Gtk.Button(label="PLAY")
+    button.get_style_context().add_class("btn-play")
     vt_box.append(button)
 
 
