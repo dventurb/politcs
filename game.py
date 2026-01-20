@@ -15,9 +15,9 @@ class Game:
         self.characters = init_characters()
         self.character = None
         self.options = [
-                Option("rock", "assets/rock.png"), 
-                Option("scissor", "assets/scissor.png"),
-                Option("paper", "assets/paper.png")
+                Option("rock", "assets/buttons/rock.png"), 
+                Option("scissor", "assets/buttons/scissor.png"),
+                Option("paper", "assets/buttons/paper.png")
                 ]
         self.rounds = 1
         self.wins = 0 
@@ -34,7 +34,7 @@ def init_menu(stack):
     stack.add_named(character_box, "menu")
 
     left_arrow = Gtk.Picture()
-    left_arrow.set_filename("assets/left_arrow.png")
+    left_arrow.set_filename("assets/buttons/left_arrow.png")
     left_arrow.get_style_context().add_class("arrow")
     gesture_left = Gtk.GestureClick()
     left_arrow.add_controller(gesture_left)
@@ -51,7 +51,7 @@ def init_menu(stack):
     character_box.append(image)
     
     rigth_arrow = Gtk.Picture()
-    rigth_arrow.set_filename("assets/rigth_arrow.png")    
+    rigth_arrow.set_filename("assets/buttons/rigth_arrow.png")    
     rigth_arrow.get_style_context().add_class("arrow")
     gesture_rigth = Gtk.GestureClick()
     rigth_arrow.add_controller(gesture_rigth)
@@ -143,7 +143,7 @@ def init_game(stack, game):
     box.append(plays_box)
 
     rock = Gtk.Picture()
-    rock.set_filename("assets/rock.png")
+    rock.set_filename("assets/buttons/rock.png")
     rock.get_style_context().add_class("rock")
     gesture = Gtk.GestureClick()
     gesture.player = image_1
@@ -157,7 +157,7 @@ def init_game(stack, game):
     plays_box.append(rock)
 
     paper = Gtk.Picture()
-    paper.set_filename("assets/paper.png")
+    paper.set_filename("assets/buttons/paper.png")
     paper.get_style_context().add_class("paper")
     gesture = Gtk.GestureClick()  
     gesture.player = image_1
@@ -171,7 +171,7 @@ def init_game(stack, game):
     plays_box.append(paper)    
 
     scissor = Gtk.Picture()
-    scissor.set_filename("assets/scissor.png")
+    scissor.set_filename("assets/buttons/scissor.png")
     scissor.get_style_context().add_class("scissor")
     gesture = Gtk.GestureClick()
     gesture.player = image_1
@@ -188,9 +188,9 @@ def init_game(stack, game):
 
 def init_characters():
     return [
-            Character("José Sócrates", 0, 0.75, 0.60, 0.70, 0.50, "assets/jose_socrates.png", "assets/socrates.mp3"),
-            Character("Luís Montenegro", 1, 0.55, 0.40, 0.70, 0.60, "assets/luis_montenegro.png", "assets/montenegro.mp3"),
-            Character("André Ventura", 2, 0.70, 0.90, 0.50, 0.50, "assets/andre_ventura.png", "assets/ventura.mp3")
+            Character("José Sócrates", 0, 0.75, 0.60, 0.70, 0.50, "assets/sprites/jose_socrates.png", "assets/sounds/socrates.mp3"),
+            Character("Luís Montenegro", 1, 0.55, 0.40, 0.70, 0.60, "assets/sprites/luis_montenegro.png", "assets/sounds/montenegro.mp3"),
+            Character("André Ventura", 2, 0.70, 0.90, 0.50, 0.50, "assets/sprites/andre_ventura.png", "assets/sounds/ventura.mp3")
             ]
 
 
@@ -264,6 +264,9 @@ def update_display_stats(game, box):
 
 
 def clicked_left_arrow(gesture, n_press, x, y, game):
+    sound = mix.Mix_LoadWAV(bytes("assets/sounds/click.mp3", "utf-8"))
+    mix.Mix_PlayChannel(-1, sound, 0)
+    
     index = (game.character.index - 1) % len(game.characters)
     
     game.character = game.characters[index]
@@ -272,6 +275,9 @@ def clicked_left_arrow(gesture, n_press, x, y, game):
     update_display_stats(game, gesture.stats) 
 
 def clicked_rigth_arrow(gesture, n_press, x, y, game):
+    sound = mix.Mix_LoadWAV(bytes("assets/sounds/click.mp3", "utf-8"))
+    mix.Mix_PlayChannel(-1, sound, 0)
+   
     index = (game.character.index + 1) % len(game.characters)
     
     game.character = game.characters[index]
@@ -294,7 +300,7 @@ def clicked_rock(gesture, n_press, x, y, game):
         gesture.box.remove(child)
     
     image = Gtk.Picture()
-    image.set_filename("assets/rock.png")
+    image.set_filename("assets/buttons/rock.png")
     image.set_size_request(width=50, height=50)
     gesture.box.append(image)
 
@@ -306,13 +312,19 @@ def clicked_rock(gesture, n_press, x, y, game):
     gesture.box.append(image)
 
     if option.option == "scissor":
+        play_sound_star_win()
+
         game.wins += 1    
         game.rounds += 1
+
         update_stars(game.wins, gesture.player)
         update_round(game.rounds, gesture.rounds)
     elif option.option == "paper":
+        play_sound_star_lose()
+
         game.loses += 1 
         game.rounds += 1
+
         update_stars(game.loses, gesture.enime)
         update_round(game.rounds, gesture.rounds)
     else:
@@ -337,7 +349,7 @@ def clicked_scissor(gesture, n_press, x, y, game):
         gesture.box.remove(child)
     
     image = Gtk.Picture()
-    image.set_filename("assets/scissor.png")
+    image.set_filename("assets/buttons/scissor.png")
     image.set_size_request(width=50, height=50)
     gesture.box.append(image)
 
@@ -349,19 +361,30 @@ def clicked_scissor(gesture, n_press, x, y, game):
     gesture.box.append(image)
 
     if option.option == "paper":
+        play_sound_star_win()
+
         game.wins += 1    
         game.rounds += 1
+
         update_stars(game.wins, gesture.player)
         update_round(game.rounds, gesture.rounds)
     elif option.option == "rock":
+        play_sound_star_lose()
+        
         game.loses += 1 
         game.rounds += 1
+
         update_stars(game.loses, gesture.enime)
         update_round(game.rounds, gesture.rounds)
     else:
         game.rounds += 1 
         update_round(game.rounds, gesture.rounds)
     
+    if game.wins == 3:
+        play_sound_victory()
+    elif game.loses == 3:
+        play_sound_losing()
+
     if game.wins == 3 or game.loses == 3:
         GLib.timeout_add(3000, delay)
         
@@ -380,7 +403,7 @@ def clicked_paper(gesture, n_press, x, y, game):
         gesture.box.remove(child)
     
     image = Gtk.Picture()
-    image.set_filename("assets/paper.png")
+    image.set_filename("assets/buttons/paper.png")
     image.set_size_request(width=50, height=50)
     gesture.box.append(image)
 
@@ -392,19 +415,30 @@ def clicked_paper(gesture, n_press, x, y, game):
     gesture.box.append(image)
 
     if option.option == "rock":
+        play_sound_star_win()
+
         game.wins += 1 
         game.rounds += 1
+
         update_stars(game.wins, gesture.player)
         update_round(game.rounds, gesture.rounds)
     elif option.option == "scissor":
+        play_sound_star_lose()
+
         game.loses += 1
         game.rounds += 1
+
         update_stars(game.loses, gesture.enime)   
         update_round(game.rounds, gesture.rounds)
     else:
         game.rounds += 1 
         update_round(game.rounds, gesture.rounds)
 
+    if game.wins == 3:
+        play_sound_victory()
+    elif game.loses == 3:
+        play_sound_losing()
+    
     if game.wins == 3 or game.loses == 3:
         GLib.timeout_add(3000, delay)
 
@@ -420,13 +454,13 @@ def clicked_paper(gesture, n_press, x, y, game):
 def update_stars(score, image):
 
     if score == 0:
-        image.set_filename("assets/stars_0.png")
+        image.set_filename("assets/stars/stars_0.png")
     elif score == 1:
-        image.set_filename("assets/stars_1.png")
+        image.set_filename("assets/stars/stars_1.png")
     elif score == 2:
-        image.set_filename("assets/stars_2.png")
+        image.set_filename("assets/stars/stars_2.png")
     elif score == 3:
-        image.set_filename("assets/stars_3.png")    
+        image.set_filename("assets/stars/stars_3.png")    
         
         
 def update_round(rounds, label):
@@ -435,3 +469,19 @@ def update_round(rounds, label):
 
 def delay():
     return False
+
+def play_sound_victory():
+    sound = mix.Mix_LoadWAV(bytes("assets/sounds/victory.mp3", "utf-8"))
+    mix.Mix_PlayChannel(-1, sound, 0)
+
+def play_sound_losing():
+    sound = mix.Mix_LoadWAV(bytes("assets/sounds/lose.mp3", "utf-8"))
+    mix.Mix_PlayChannel(-1, sound, 0)
+
+def play_sound_star_win():
+    sound = mix.Mix_LoadWAV(bytes("assets/sounds/star_win.mp3", "utf-8"))
+    mix.Mix_PlayChannel(-1, sound, 0)
+
+def play_sound_star_lose():
+    sound = mix.Mix_LoadWAV(bytes("assets/sounds/star_lose.mp3", "utf-8"))
+    mix.Mix_PlayChannel(-1, sound, 0)
